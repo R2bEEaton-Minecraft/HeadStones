@@ -3,6 +3,7 @@ package cc.spea.headstones;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.Skull;
+import org.bukkit.entity.EnderCrystal;
 import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -94,6 +95,8 @@ public class HeadStones extends JavaPlugin implements Listener {
         String deathMessage = skull.getPersistentDataContainer().get(new NamespacedKey(this, "deathMessage"), PersistentDataType.STRING);
         if (deathMessage != null) {
             Bukkit.broadcastMessage(ChatColor.YELLOW + player.getName() + " discovered remains: " + deathMessage);
+        } else {
+            return;
         }
 
         List<String> items = skull.getPersistentDataContainer().get(new NamespacedKey(this, "items"), PersistentDataType.LIST.strings());
@@ -111,6 +114,12 @@ public class HeadStones extends JavaPlugin implements Listener {
         if (xp != null) {
             loc.getWorld().spawn(loc, ExperienceOrb.class).setExperience(xp);
         }
+
+        for (Player p : getServer().getOnlinePlayers()) {
+            p.playSound(p.getLocation(), Sound.ENTITY_WITHER_SPAWN, SoundCategory.NEUTRAL, 1.0f, 1.0f);
+        }
+
+        loc.getWorld().spawnParticle(Particle.BLOCK_CRACK, loc.add(0.5, 0.5, 0.5), 1000, 0.0, 0.0, 0.0, 0.05, Material.REDSTONE_BLOCK.createBlockData());
     }
 
 
