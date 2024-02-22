@@ -99,19 +99,21 @@ public class HeadStones extends JavaPlugin implements Listener {
             return;
         }
 
-        List<String> items = skull.getPersistentDataContainer().get(new NamespacedKey(this, "items"), PersistentDataType.LIST.strings());
-        if (items != null) {
-            for (String it : items) {
-                try {
-                    ItemStack itemStack = itemStackFromBase64(it);
-                    loc.getWorld().dropItemNaturally(loc, itemStack);
-                } catch (IOException e) {
+        try {
+            List<String> items = skull.getPersistentDataContainer().get(new NamespacedKey(this, "items"), PersistentDataType.LIST.strings());
+            if (items != null) {
+                for (String it : items) {
+                    try {
+                        ItemStack itemStack = itemStackFromBase64(it);
+                        loc.getWorld().dropItemNaturally(loc, itemStack);
+                    } catch (IOException e) {
+                    }
                 }
             }
-        }
+        } catch (Exception e) {}
 
         Integer xp = skull.getPersistentDataContainer().get(new NamespacedKey(this, "xp"), PersistentDataType.INTEGER);
-        if (xp != null) {
+        if (xp != null && xp != 0) {
             loc.getWorld().spawn(loc, ExperienceOrb.class).setExperience(xp);
         }
 
