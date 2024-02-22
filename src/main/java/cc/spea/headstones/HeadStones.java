@@ -1,12 +1,10 @@
 package cc.spea.headstones;
 
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.Skull;
 import org.bukkit.entity.ExperienceOrb;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -65,7 +63,9 @@ public class HeadStones extends JavaPlugin implements Listener {
 
         skull.getPersistentDataContainer().set(new NamespacedKey(this, "items"), PersistentDataType.LIST.strings(), inventory);
         skull.getPersistentDataContainer().set(new NamespacedKey(this, "xp"), PersistentDataType.INTEGER, event.getDroppedExp());
+        skull.getPersistentDataContainer().set(new NamespacedKey(this, "deathMessage"), PersistentDataType.STRING, event.getDeathMessage().replace(event.getEntity().getName(), "Player"));
 
+        event.setDeathMessage(null);
         event.getDrops().clear();
         event.setDroppedExp(0);
 
@@ -75,7 +75,7 @@ public class HeadStones extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event) {
-        if (event.getBlock().getType() == Material.PLAYER_HEAD) breakPlayerHead(event.getBlock());
+        if (event.getBlock().getType() == Material.PLAYER_HEAD) breakPlayerHead(event.getPlayer(), event.getBlock());
     }
 
     @EventHandler
@@ -87,9 +87,14 @@ public class HeadStones extends JavaPlugin implements Listener {
         }
     }
 
-    public void breakPlayerHead(Block block) {
+    public void breakPlayerHead(Player player, Block block) {
         Location loc = block.getLocation();
         Skull skull = (Skull) block.getState();
+
+        String deathMessage = skull.getPersistentDataContainer().get(new NamespacedKey(this, "deathMessage"), PersistentDataType.STRING);
+        if (deathMessage != null) {
+            Bukkit.broadcastMessage(ChatColor.YELLOW + player.getName() + " discovered remains: " + deathMessage);
+        }
 
         List<String> items = skull.getPersistentDataContainer().get(new NamespacedKey(this, "items"), PersistentDataType.LIST.strings());
         if (items != null) {
