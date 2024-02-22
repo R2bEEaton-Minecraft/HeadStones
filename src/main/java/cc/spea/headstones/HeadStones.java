@@ -3,15 +3,16 @@ package cc.spea.headstones;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.Skull;
-import org.bukkit.entity.EnderCrystal;
 import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockFromToEvent;
-import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.server.BroadcastMessageEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -23,18 +24,13 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Date;
 import java.util.List;
 
 public class HeadStones extends JavaPlugin implements Listener {
     @Override
     public void onEnable() {
         getServer().getPluginManager().registerEvents(this, this);
-    }
-
-    @Override
-    public void onDisable() {
-
     }
 
     @EventHandler
@@ -88,6 +84,44 @@ public class HeadStones extends JavaPlugin implements Listener {
         }
     }
 
+    @EventHandler
+    public void onPlayerInteractEvent(PlayerInteractEvent event) {
+        if (event.getClickedBlock() == null || event.getClickedBlock().getType() != Material.PLAYER_HEAD) return;
+        if (event.getItem() == null || event.getItem().getType() != Material.TOTEM_OF_UNDYING) return;
+
+        Skull playerHead = (Skull) event.getClickedBlock().getState();
+
+        if (playerHead.getOwningPlayer().isOnline() && playerHead.getOwningPlayer().getPlayer().getGameMode() == GameMode.SPECTATOR) {
+            Player player = playerHead.getOwningPlayer().getPlayer();
+            Location blockLoc = event.getClickedBlock().getLocation().add(0.5, 0, 0.5);
+            player.teleport(blockLoc);
+            blockLoc.getWorld().spawnParticle(Particle.ENCHANTMENT_TABLE, blockLoc.clone().add(0, 1, 0), 350, 0, 0, 0, 2);
+            blockLoc.getWorld().playSound(blockLoc, Sound.BLOCK_RESPAWN_ANCHOR_SET_SPAWN, 1.0f, 1.0f);
+
+            ItemStack savedItem = event.getItem().clone();
+            event.getItem().setAmount(0);
+
+            Bukkit.getScheduler().scheduleSyncDelayedTask(this , () -> {
+                if (!player.isOnline()) {
+                    blockLoc.getWorld().playSound(blockLoc, Sound.BLOCK_NOTE_BLOCK_BANJO, 1.0f, 1.0f);
+                    event.getPlayer().getInventory().addItem(savedItem);
+                    return;
+                }
+
+                blockLoc.getWorld().spawnParticle(Particle.SOUL_FIRE_FLAME, blockLoc.clone().add(0, 1, 0), 200, 0, 0, 0, 0.1);
+                blockLoc.getWorld().playSound(blockLoc, Sound.ENTITY_EVOKER_PREPARE_SUMMON, 1.0f, 1.0f);
+
+                player.teleport(blockLoc);
+                player.setGameMode(getServer().getDefaultGameMode());
+
+                breakPlayerHead(event.getPlayer(), event.getClickedBlock());
+
+                event.getClickedBlock().setType(Material.AIR);
+                Bukkit.broadcastMessage(ChatColor.YELLOW + event.getPlayer().getName() + " brought " + player.getName() + " back!");
+            }, 40L);
+        }
+    }
+
     public void breakPlayerHead(Player player, Block block) {
         Location loc = block.getLocation();
         Skull skull = (Skull) block.getState();
@@ -123,8 +157,6 @@ public class HeadStones extends JavaPlugin implements Listener {
 
         loc.getWorld().spawnParticle(Particle.BLOCK_CRACK, loc.add(0.5, 0.5, 0.5), 1000, 0.0, 0.0, 0.0, 0.05, Material.REDSTONE_BLOCK.createBlockData());
     }
-
-
 
     /**
      * Gets one {@link ItemStack} from Base64 string.
