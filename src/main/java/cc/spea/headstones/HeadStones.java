@@ -34,20 +34,7 @@ public class HeadStones extends JavaPlugin implements Listener {
     public void onDeath(PlayerDeathEvent event) {
         if (event.getKeepInventory()) return;
 
-        Location loc = event.getEntity().getLocation();
-        Block skullBlock = loc.getBlock();
-
-        // Go up to find a valid spot
-        while (skullBlock.getType() != Material.AIR) {
-            skullBlock = loc.add(0, 1, 0).getBlock();
-        }
-        // Go down to the surface
-        while (skullBlock.getType() == Material.AIR) {
-            skullBlock = loc.add(0, -1, 0).getBlock();
-        }
-        skullBlock = loc.add(0, 1, 0).getBlock();
-
-        skullBlock.setType(Material.PLAYER_HEAD);
+        Block skullBlock = getBlock(event);
         Skull skull = (Skull) skullBlock.getState();
 
         List<String> inventory = new ArrayList<>();
@@ -65,6 +52,24 @@ public class HeadStones extends JavaPlugin implements Listener {
 
         skull.setOwningPlayer(Bukkit.getServer().getOfflinePlayer(event.getEntity().getUniqueId()));
         skull.update();
+    }
+
+    private static Block getBlock(PlayerDeathEvent event) {
+        Location loc = event.getEntity().getLocation();
+        Block skullBlock = loc.getBlock();
+
+        // Go up to find a valid spot
+        while (skullBlock.getType() != Material.AIR) {
+            skullBlock = loc.add(0, 1, 0).getBlock();
+        }
+        // Go down to the surface
+        while (skullBlock.getType() == Material.AIR) {
+            skullBlock = loc.add(0, -1, 0).getBlock();
+        }
+        skullBlock = loc.add(0, 1, 0).getBlock();
+
+        skullBlock.setType(Material.PLAYER_HEAD);
+        return skullBlock;
     }
 
     @EventHandler
