@@ -10,9 +10,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.server.BroadcastMessageEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -24,7 +22,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class HeadStones extends JavaPlugin implements Listener {
@@ -86,8 +83,8 @@ public class HeadStones extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onPlayerInteractEvent(PlayerInteractEvent event) {
-        if (event.getClickedBlock() == null || event.getClickedBlock().getType() != Material.PLAYER_HEAD) return;
-        if (event.getItem() == null || event.getItem().getType() != Material.TOTEM_OF_UNDYING) return;
+        if (event.getClickedBlock() == null || (event.getClickedBlock().getType() != Material.PLAYER_HEAD && event.getClickedBlock().getType() != Material.PLAYER_WALL_HEAD)) return;
+        if (event.getItem() == null || event.getItem().getType() != Material.WITHER_SKELETON_SKULL) return;
 
         Skull playerHead = (Skull) event.getClickedBlock().getState();
 
