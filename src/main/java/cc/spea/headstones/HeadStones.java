@@ -101,7 +101,8 @@ public class HeadStones extends JavaPlugin implements Listener {
             blockLoc.getWorld().playSound(blockLoc, Sound.BLOCK_RESPAWN_ANCHOR_SET_SPAWN, 1.0f, 1.0f);
 
             ItemStack savedItem = event.getItem().clone();
-            event.getItem().setAmount(0);
+            savedItem.setAmount(1);
+            event.getItem().setAmount(event.getItem().getAmount() - 1);
 
             Bukkit.getScheduler().scheduleSyncDelayedTask(this , () -> {
                 if (!player.isOnline()) {
