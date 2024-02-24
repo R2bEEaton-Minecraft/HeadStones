@@ -89,7 +89,7 @@ public class HeadStones extends JavaPlugin implements Listener {
     @EventHandler
     public void onPlayerInteractEvent(PlayerInteractEvent event) {
         if (event.getClickedBlock() == null || (event.getClickedBlock().getType() != Material.PLAYER_HEAD && event.getClickedBlock().getType() != Material.PLAYER_WALL_HEAD)) return;
-        if (event.getItem() == null || event.getItem().getType() != Material.WITHER_SKELETON_SKULL) return;
+        if (event.getItem() == null || event.getItem().getType() != Material.ENCHANTED_GOLDEN_APPLE) return;
 
         Skull playerHead = (Skull) event.getClickedBlock().getState();
 
