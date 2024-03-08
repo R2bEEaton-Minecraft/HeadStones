@@ -39,7 +39,8 @@ public class HeadStones extends JavaPlugin implements Listener {
         Block skullBlock = getBlock(event);
         Skull skull = (Skull) skullBlock.getState();
 
-        event.getEntity().setBedSpawnLocation(skullBlock.getLocation());
+        // Set spawn to there
+        event.getEntity().setBedSpawnLocation(skullBlock.getLocation(), true);
 
         List<String> inventory = new ArrayList<>();
         for (ItemStack is : event.getDrops()) {
