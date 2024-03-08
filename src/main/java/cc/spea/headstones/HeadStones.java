@@ -8,8 +8,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockDispenseEvent;
 import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
@@ -85,6 +87,17 @@ public class HeadStones extends JavaPlugin implements Listener {
             }
         }
     }
+
+    @EventHandler
+    public void onPlayerBucketEmpty(PlayerBucketEmptyEvent event) {
+        if (event.getBlock().getType() == Material.PLAYER_HEAD) {
+            if (((Skull) event.getBlock().getState()).getPersistentDataContainer().has(new NamespacedKey(this, "items"))) {
+                event.setCancelled(true);
+            }
+        }
+    }
+
+    //Todo: Fix dispenser
 
     @EventHandler
     public void onPlayerInteractEvent(PlayerInteractEvent event) {
