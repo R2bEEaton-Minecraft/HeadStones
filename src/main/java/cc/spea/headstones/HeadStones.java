@@ -3,12 +3,14 @@ package cc.spea.headstones;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.Skull;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockDispenseEvent;
+import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
@@ -16,6 +18,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.io.BukkitObjectInputStream;
 import org.bukkit.util.io.BukkitObjectOutputStream;
@@ -28,6 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class HeadStones extends JavaPlugin implements Listener {
+
     @Override
     public void onEnable() {
         getServer().getPluginManager().registerEvents(this, this);
@@ -53,7 +57,10 @@ public class HeadStones extends JavaPlugin implements Listener {
         List<String> inventory = new ArrayList<>();
         for (ItemStack is : event.getDrops()) {
             inventory.add(itemStackToBase64(is));
+            getLogger().info(event.getEntity().getName() + " item: " + is);
         }
+        getLogger().info(event.getEntity().getName() + " xp: " + event.getDroppedExp());
+        getLogger().info(event.getEntity().getName() + " death message: " + event.getDeathMessage());
 
         skull.getPersistentDataContainer().set(new NamespacedKey(this, "items"), PersistentDataType.LIST.strings(), inventory);
         skull.getPersistentDataContainer().set(new NamespacedKey(this, "xp"), PersistentDataType.INTEGER, event.getDroppedExp());
@@ -65,6 +72,8 @@ public class HeadStones extends JavaPlugin implements Listener {
 
         skull.setOwningPlayer(Bukkit.getServer().getOfflinePlayer(event.getEntity().getUniqueId()));
         skull.update();
+
+        Bukkit.broadcastMessage(skull.getPersistentDataContainer().toString());
     }
 
     private static Block getBlock(PlayerDeathEvent event) {
@@ -109,6 +118,16 @@ public class HeadStones extends JavaPlugin implements Listener {
     }
 
     //Todo: Fix dispenser
+
+    /**
+     * The "BOAAY" fix
+     */
+    @EventHandler
+    public void onBlockExplodeEvent(BlockExplodeEvent event) {
+        if (event.getBlock().getType() == Material.PLAYER_HEAD) {
+            event.setCancelled(true);
+        }
+    }
 
     @EventHandler
     public void onPlayerInteractEvent(PlayerInteractEvent event) {
